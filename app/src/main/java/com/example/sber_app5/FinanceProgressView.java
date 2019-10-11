@@ -19,16 +19,16 @@ public class FinanceProgressView extends View {
     private int mProgress;
     private int mColor;
     private int mTextSize;
+    private int maxTextSize;
 
     private final RectF mProgressRect = new RectF(0, 0, 700, 700);
-    private final RectF mNeedleRect = new RectF(0, 0, 300, 100);
     private Paint mCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint maxTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Rect mTextBounds = new Rect();
     private static final int DEFAULT_COLOR = Color.RED;
     private static final int MAX_PROGRESS = 360;
-    private static final int MAX_ANGLE = 360;
     private static final float STROKE_WIDTH = 40;
     private static final float TEXT_STROKE_WIDTH = 5;
     private static final float LINE_STROKE_WIDTH = 15;
@@ -53,19 +53,21 @@ public class FinanceProgressView extends View {
         // применяя те изменения, которые были применены межжду save и restore
 
         canvas.drawArc(mProgressRect, 0f, 360 * 1.0f, false, mCirclePaint);
-        final String progressString = mProgress + "км/ч";
-        final float textWidth = mTextPaint.measureText(progressString);
-        mTextPaint.getTextBounds(progressString, 0, progressString.length(), mTextBounds);
-        float x = mProgressRect.width() / 2 - textWidth / 2; /*mProgressRect.width()/2f - mTextBounds.width()/2f - mTextBounds.left;*/
-        float y = mProgressRect.height() / 2 - (mTextPaint.ascent() + mTextPaint.descent()) / 2; /*mProgressRect.height()/2f - mTextBounds.height()/2f - mTextBounds.bottom;*/
-        canvas.drawText(progressString, x, y, mTextPaint);
 
-        double radius = mProgressRect.height() / 2;
-        double angle = (((2 * Math.PI) / MAX_PROGRESS) * mProgress + Math.PI / 2);
+        final String progressString = mProgress + "км/ч";
+        final String maxString = MAX_PROGRESS + "км/ч";
+        final float textWidth = mTextPaint.measureText(progressString);
+        final float maxTextWidth = mTextPaint.measureText(progressString);
+        mTextPaint.getTextBounds(progressString, 0, progressString.length(), mTextBounds);
+        maxTextPaint.getTextBounds(maxString, 0, maxString.length(), mTextBounds);
+        float x = mProgressRect.width() / 2 - textWidth / 2; /*mProgressRect.width()/2f - mTextBounds.width()/2f - mTextBounds.left;*/
+        float max_x = mProgressRect.width() / 2 - maxTextWidth / 2;
+        float y = (float)(mProgressRect.height() * 1.2); /*mProgressRect.height()/2f - mTextBounds.height()/2f - mTextBounds.bottom;*/
+        canvas.drawText(progressString, x, y, mTextPaint);
+        canvas.drawText(maxString, max_x, (float)(y * 1.1), maxTextPaint);
+
         float x_line = mProgressRect.width() / 2 + STROKE_WIDTH / 2;
         float y_line = mProgressRect.height() / 2 + STROKE_WIDTH / 2;
-        float x1 = (float)(radius * Math.cos(angle));
-        float y1 = (float)(radius * Math.sin(angle));
 
         canvas.save();
         canvas.rotate(mProgress * 1.0f, x_line, y_line);
@@ -104,6 +106,11 @@ public class FinanceProgressView extends View {
         mTextPaint.setColor(mColor);
         mTextPaint.setStyle(Paint.Style.FILL);
 
+        maxTextPaint.setTextSize(maxTextSize);
+        maxTextPaint.setStrokeWidth(TEXT_STROKE_WIDTH);
+        maxTextPaint.setColor(mColor);
+        maxTextPaint.setStyle(Paint.Style.FILL);
+
         if (mProgress <= 50) {
             mTextPaint.setColor(getResources().getColor(R.color.green));
         }
@@ -129,6 +136,7 @@ public class FinanceProgressView extends View {
             mProgress = typedArray.getInteger(R.styleable.FinanceProgressView_progress,0);
             mColor = typedArray.getColor(R.styleable.FinanceProgressView_color, DEFAULT_COLOR);
             mTextSize = typedArray.getDimensionPixelSize(R.styleable.FinanceProgressView_text_size, getResources().getDimensionPixelSize(R.dimen.defaultTextSize));
+            maxTextSize = typedArray.getDimensionPixelSize(R.styleable.FinanceProgressView_max_text_size, getResources().getDimensionPixelSize(R.dimen.maxTextSize));
             Log.d(TAG, "Progress = " + mProgress + ", Color = " + mColor + ", TextSize = " + mTextSize);
         } finally {
             typedArray.recycle();
@@ -147,6 +155,10 @@ public class FinanceProgressView extends View {
         return mTextSize;
     }
 
+    public int getMaxTextSize(){
+        return maxTextSize;
+    }
+
     public void setmProgress(int mProgress) {
         this.mProgress = mProgress;
     }
@@ -157,5 +169,9 @@ public class FinanceProgressView extends View {
 
     public void setmTextSize(int mTextSize) {
         this.mTextSize = mTextSize;
+    }
+
+    public void setMaxTextSize(int maxTextSize){
+        this.maxTextSize = maxTextSize;
     }
 }
